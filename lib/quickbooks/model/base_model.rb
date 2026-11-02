@@ -5,7 +5,7 @@ module Quickbooks
       include ActiveModel::AttributeMethods
       include ActiveModel::Validations
       include Validator
-      include ROXML
+      include Quickbooks::Util::XmlMapping
 
       xml_convention :camelcase
 
@@ -13,7 +13,7 @@ module Quickbooks
         attributes.each {|key, value| public_send("#{key}=", value) }
       end
 
-      # ROXML doesnt insert the namespaces into generated XML so we need to do it ourselves
+      # XmlMapping doesnt insert the namespaces into generated XML so we need to do it ourselves
       # insert the static namespaces in the first opening tag that matches the +model_name+
       def to_xml_inject_ns(model_name, options = {})
         s = StringIO.new
@@ -31,9 +31,7 @@ module Quickbooks
       def as_json(options = nil)
         options = {} if options.nil?
         options = options.dup if options.frozen?
-        except_conditions = ["roxml_references"]
-        except_conditions << options[:except]
-        options[:except] = except_conditions.flatten.uniq.compact
+        options[:except] = [options[:except]].flatten.uniq.compact
         super(options)
       end
 
@@ -65,7 +63,7 @@ module Quickbooks
         end
 
         def attribute_names
-          roxml_attrs.map(&:accessor)
+          xml_attributes.map(&:accessor)
         end
 
         # These can be over-ridden in each model object as needed
@@ -103,7 +101,7 @@ module Quickbooks
         end
 
         def reference_attrs
-          matches = roxml_attrs.select{|attr| attr.sought_type == Quickbooks::Model::BaseReference}.map{|attr| attr.accessor}
+          matches = xml_attributes.select{|attr| attr.sought_type == Quickbooks::Model::BaseReference}.map{|attr| attr.accessor}
         end
 
         def inspect
@@ -111,9 +109,8 @@ module Quickbooks
         end
 
         def attrs_with_types
-          roxml_attrs.map do |attr|
-            "#{attr.accessor}:" +
-              "#{attr.class.block_shorthands.invert[attr.blocks.last]}:#{attr.sought_type}"
+          xml_attributes.map do |attr|
+            "#{attr.accessor}:#{attr.cast_type || (attr.mapped? ? :object : :text)}:#{attr.sought_type}"
           end
         end
       end

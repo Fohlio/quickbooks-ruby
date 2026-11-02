@@ -1,4 +1,4 @@
-require 'roxml'
+require 'quickbooks/util/xml_mapping'
 require 'logger'
 require 'nokogiri'
 require 'active_model'

@@ -1,6 +1,6 @@
 class Quickbooks::Model::BatchResponse < Quickbooks::Model::BaseModel
   class BatchItemResponse
-    include ROXML
+    include Quickbooks::Util::XmlMapping
     xml_name  "BatchItemResponse"
 
     xml_accessor :bId, :from => "@bId"

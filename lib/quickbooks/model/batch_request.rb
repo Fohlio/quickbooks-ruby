@@ -1,6 +1,6 @@
 class Quickbooks::Model::BatchRequest < Quickbooks::Model::BaseModel
   class BatchItemRequest
-    include ROXML
+    include Quickbooks::Util::XmlMapping
     XML_NODE = "BatchItemRequest"
     xml_name XML_NODE
 

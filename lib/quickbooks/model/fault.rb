@@ -2,7 +2,7 @@ module Quickbooks
   module Model
     class Fault < BaseModel
       class Error
-        include ROXML
+        include Quickbooks::Util::XmlMapping
         xml_name 'Error'
         xml_accessor :code, :from => "@code"
         xml_accessor :element, :from => "@element"

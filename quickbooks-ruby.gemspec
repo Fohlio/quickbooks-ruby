@@ -17,10 +17,9 @@ Gem::Specification.new do |gem|
   gem.required_ruby_version = '>= 2.6'
 
   gem.add_dependency 'oauth2', '< 3.0'
-  gem.add_dependency 'roxml', '~> 4.2'
   gem.add_dependency 'activemodel', '> 4.0'
   gem.add_dependency 'net-http-persistent'
-  gem.add_dependency 'nokogiri'  # promiscuous mode
+  gem.add_dependency 'nokogiri'
   gem.add_dependency 'multipart-post' # promiscuous mode
   gem.add_dependency 'faraday', '< 3.0'
   gem.add_dependency 'faraday-multipart', '~> 1.0', '>= 1.0.4'

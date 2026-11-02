@@ -1,3 +1,7 @@
+## Unreleased
+
+* Replace the unmaintained `roxml` gem with a built-in Nokogiri-backed mapper (`Quickbooks::Util::XmlMapping`). The model DSL (`xml_accessor`, `xml_reader`, `from_xml`, `to_xml`) is unchanged. Code that did `include ROXML` in custom classes should `include Quickbooks::Util::XmlMapping` instead, and `roxml_attrs` is now `xml_attributes`.
+
 ## 2.0.7 (2025-04-14)
 
 * Add ship from address reference to sales receipt #616. Thanks @rchekaluk
