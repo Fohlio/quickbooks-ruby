@@ -33,12 +33,12 @@ module Quickbooks
       end
 
       CASTS = {
-        Integer    => ->(v) { v.to_i },
-        Float      => ->(v) { Float(v) },
-        BigDecimal => ->(v) { BigDecimal(v) },
-        Date       => ->(v) { Date.parse(v) },
-        DateTime   => ->(v) { DateTime.parse(v) },
-        Time       => ->(v) { Time.parse(v) },
+        ::Integer    => ->(v) { v.to_i },
+        ::Float      => ->(v) { Float(v) },
+        ::BigDecimal => ->(v) { BigDecimal(v) },
+        ::Date       => ->(v) { ::Date.parse(v) },
+        ::DateTime   => ->(v) { ::DateTime.parse(v) },
+        ::Time       => ->(v) { ::Time.parse(v) },
         :bool      => lambda do |v|
           case v.downcase
           when 'true', 'yes', '1', 't' then true
@@ -49,9 +49,9 @@ module Quickbooks
 
       def self.node_from(data)
         case data
-        when Nokogiri::XML::Document then data.root
-        when Nokogiri::XML::Node then data
-        else Nokogiri::XML(data.respond_to?(:read) ? data.read : data.to_s).root
+        when ::Nokogiri::XML::Document then data.root
+        when ::Nokogiri::XML::Node then data
+        else ::Nokogiri::XML(data.respond_to?(:read) ? data.read : data.to_s).root
         end
       end
 
@@ -67,17 +67,17 @@ module Quickbooks
           @block = block
 
           as = opts[:as] || default_type
-          @collection = as.is_a?(Array)
+          @collection = as.is_a?(::Array)
           as = as.first if @collection
 
-          if as.is_a?(Hash)
+          if as.is_a?(::Hash)
             as.assert_valid_keys(:key, :value)
             @hash = as
             @sought_type = :hash
           elsif mapped?(as)
             @sought_type = as
           else
-            raise ArgumentError, "Invalid :as argument #{as}" unless as.nil? || as == :text || CASTS.key?(as)
+            raise ::ArgumentError, "Invalid :as argument #{as}" unless as.nil? || as == :text || CASTS.key?(as)
             @sought_type = :text
             @cast_type = as unless as == :text
           end
@@ -90,7 +90,7 @@ module Quickbooks
             else :element
             end
           from = from.to_s.sub('@', '') if @kind == :attribute
-          @explicit_name = from.is_a?(String)
+          @explicit_name = from.is_a?(::String)
           @raw_name = (from || (collection? || hash? ? @attr_name.singularize : @attr_name)).to_s
           @names = {}
         end
@@ -104,7 +104,7 @@ module Quickbooks
         end
 
         def mapped?(type = @sought_type)
-          type.is_a?(Class) && type.respond_to?(:from_xml)
+          type.is_a?(::Class) && type.respond_to?(:from_xml)
         end
 
         def instance_variable_name
@@ -155,8 +155,8 @@ module Quickbooks
 
         def default_type
           if accessor.end_with?('?') then :bool
-          elsif accessor.end_with?('_on') then Date
-          elsif accessor.end_with?('_at') then DateTime
+          elsif accessor.end_with?('_on') then ::Date
+          elsif accessor.end_with?('_at') then ::DateTime
           end
         end
 
@@ -207,13 +207,13 @@ module Quickbooks
         def transform(value)
           value = cast(value) if @cast_type
           @block ? @block.call(value) : value
-        rescue StandardError => ex
+        rescue ::StandardError => ex
           raise ex, "#{accessor}: #{ex.message}"
         end
 
         def cast(value)
           caster = CASTS.fetch(@cast_type)
-          return value.map { |v| v.blank? ? nil : caster.call(v) } if value.is_a?(Array)
+          return value.map { |v| v.blank? ? nil : caster.call(v) } if value.is_a?(::Array)
           value.blank? ? nil : caster.call(value)
         end
 
@@ -256,7 +256,7 @@ module Quickbooks
         end
 
         def add_node(parent, name)
-          parent.add_child(Nokogiri::XML::Node.new(name, parent.document))
+          parent.add_child(::Nokogiri::XML::Node.new(name, parent.document))
         end
       end
 
@@ -321,14 +321,14 @@ module Quickbooks
               end
             end
           end
-        rescue ArgumentError => e
+        rescue ::ArgumentError => e
           raise e, e.message + " for class #{self}"
         end
 
         private
 
         def xml_attr(*syms, &block)
-          opts = syms.last.is_a?(Hash) ? syms.pop : {}
+          opts = syms.last.is_a?(::Hash) ? syms.pop : {}
           syms.map do |sym|
             Attribute.new(sym, opts, &block).tap do |attr|
               if xml_attributes.map(&:accessor).include?(attr.accessor)
@@ -350,7 +350,7 @@ module Quickbooks
       end
 
       def to_xml(params = {})
-        root = Nokogiri::XML::Node.new(params[:name] || self.class.tag_name, Nokogiri::XML::Document.new)
+        root = ::Nokogiri::XML::Node.new(params[:name] || self.class.tag_name, ::Nokogiri::XML::Document.new)
         self.class.xml_attributes.each { |attr| attr.write(root, self) }
         root
       end
